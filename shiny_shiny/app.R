@@ -9,13 +9,14 @@ ui <- fluidPage (
     sidebarLayout (
         
         sidebarPanel (
-            selectizeInput("megye", "megye kiválasztása", megyek )
+            selectizeInput("megye", "megye kiválasztása", megyek ),
+            numericInput("nm", "Hány négyzetméter?", value = 50, min = 0, max = 100),
         ),
         
         mainPanel (
             plotOutput ("valamiPlot")
-        )
-        
+        ),
+
     )
 )
 
