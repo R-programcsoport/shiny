@@ -2,6 +2,10 @@ library (shiny)
 library (leaflet)
 df <- adatb
 megyek <- df$Megye
+epites <- df$`Építés típusa`
+futes <- df$Futés
+emelet <- df$Emelet
+allapot <- df$`Ing. állapota`
 ui <- fluidPage (
     
     titlePanel ("shiny shiny"),
@@ -10,7 +14,12 @@ ui <- fluidPage (
         
         sidebarPanel (
             selectizeInput("megye", "megye kiválasztása", megyek ),
+            selectizeInput("epites", "Építés típusa:", epites ),
+            selectizeInput("futes", "fűtés típusa:", futes ),
+            selectizeInput("emelet", "Emeleti elhelyezkedés:", emelet ),
+            selectizeInput("allapot", "Ingatlan állapota:", allapot ),
             numericInput("nm", "Hány négyzetméter?", value = 50, min = 0, max = 100),
+            sliderInput("szoba", "Szobák száma:" , value = 2, min =0, max = 7)
         ),
         
         mainPanel (
