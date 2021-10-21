@@ -9,7 +9,7 @@
 
 library(shiny)
 library(leaflet)
-df <- read.csv("data.csv")
+# df <- read.csv("adatb.csv",sep = ";")
 r_colors <- rgb(t(col2rgb(colors()) / 255))
 names(r_colors) <- colors()
 
