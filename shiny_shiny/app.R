@@ -1,5 +1,7 @@
 library (shiny)
-
+library (leaflet)
+df <- adatb
+megyek <- df$Megye
 ui <- fluidPage (
     
     titlePanel ("shiny shiny"),
@@ -7,7 +9,7 @@ ui <- fluidPage (
     sidebarLayout (
         
         sidebarPanel (
-            
+            selectizeInput("megye", "megye kiválasztása", megyek )
         ),
         
         mainPanel (
