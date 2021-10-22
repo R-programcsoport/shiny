@@ -6,6 +6,9 @@ library(stats)
 library(car)
 library(GGally)
 library(corpcor)
+library(sandwich)
+library(lmtest)
+library(olsrr)
 
 names(df)[1]<- "Telepules"
 
@@ -84,7 +87,7 @@ cor2pcor(cov(X))
 resettest(model_0, power = 2:3, type = "regressor", data = df)
 
 #heteroszked
-library(olsrr)
+
 uhat2 <- model_0$residuals^2
 y <- fitted(model_0)
 bptest(uhat2 ~ y + I(y^2))
@@ -99,9 +102,10 @@ ols_test_breusch_pagan(model_0)
                  #futes + emelet + ing_allapota + lift + egesz_szoba + felszobak_szama + regio, data = df)
 #summary(var.func)                            nem biztos hogy kellenek
 
-library(sandwich)
-library(lmtest)
+
 coeftest(model_0, vcov. = vcovHC(model_0, "HC1")) 
+
+
 
 #modellszelekció
 
@@ -111,5 +115,9 @@ model_1 <- lm (data = df, formula = ar_e_ft ~ terulet_m_2 + epites_tipusa +
 waldtest(model_0, model_1)
 summary(model_1)
 coeftest(model_1, vcov. = vcovHC(model_0, "HC1"))
+
+
+
+
 
 
