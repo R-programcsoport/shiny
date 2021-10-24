@@ -1,12 +1,13 @@
 library (shiny)
 library (leaflet)
-df <- adatb
+
+df <- read.csv("adatb_tisztitott.csv", sep = ";", encoding = "UTF-8")
 megyek <- df$Megye
 epites <- df$`Építés típusa`
 futes <- df$Futés
 emelet <- df$Emelet
 allapot <- df$`Ing. állapota`
-read.csv(encoding = )
+
 ui <- fluidPage (
     
     titlePanel ("shiny shiny"),
