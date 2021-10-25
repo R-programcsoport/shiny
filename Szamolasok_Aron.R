@@ -29,8 +29,8 @@ df$ing_allapota <- factor(df$ing_allapota,
 
 table(df$ing_allapota)
 
-df$epites_tipusa <- factor(df$epites_tipusa, levels=c("panel", "egyéb", "tégla"),
-                           labels = c("0", "1", "2"))
+# df$epites_tipusa <- factor(df$epites_tipusa, levels=c("panel", "egyéb", "tégla"),
+#                            labels = c("0", "1", "2"))
 
 df$terulet_m_2 <- as.integer(df$terulet_m_2)
 df$ar_e_ft <- as.double(df$ar_e_ft)
@@ -42,7 +42,7 @@ df$futes <- fct_collapse (df$futes,
   gaz = c("gáz", "gáz (cirko)", "gáz (konvektor)"),
   egyeb = "egyéb")
 
-df$regio <- fct_collapse(df$megye,
+df$regio <- fct_collapse(na.omit(df$megye),
     Del_Alfold = c("Bács-Kiskun", "Békés", "Csongrád"),
     Del_Dunantul = c( "Baranya", "Somogy"),
     Eszak_Alfold = c("Hajdú-Bihar", "Jász-Budapestgykun-Szolnok", "Szabolcs-Szatmár-Bereg"),
@@ -52,7 +52,7 @@ df$regio <- fct_collapse(df$megye,
     Pest="Pest",
     Budapest="Budapest")
 
-
+write.csv(df, "adatb_regio.csv",fileEncoding = "UTF-8")
 
 #szamolasok
 
@@ -116,8 +116,14 @@ waldtest(model_0, model_1)
 summary(model_1)
 coeftest(model_1, vcov. = vcovHC(model_0, "HC1"))
 
+su <- summary(model_1)[[4]]
+su2 <- as.matrix(summary(model_1)[[4]][])
 
+beta_a <- su2[,1]-su2[,2]
+beta_b <- su2[,1]+su2[,2]
 
-
-
-
+beta_a
+beta_b
+beta <- cbind(beta_a,beta_b)
+beta
+write.csv(beta, "betak.csv")

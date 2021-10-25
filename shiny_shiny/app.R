@@ -1,12 +1,22 @@
 library (shiny)
 library (leaflet)
 
-df <- read.csv("adatb_tisztitott.csv", sep = ";", encoding = "UTF-8")
-megyek <- df$Megye
-epites <- df$`Építés típusa`
-futes <- df$Futés
-emelet <- df$Emelet
-allapot <- df$`Ing. állapota`
+df <- read.csv("adatb_regio.csv", encoding = "UTF-8")
+betak <- read.csv("betak.csv")
+megyek <- df$megye
+epites <- df$epites_tipusa
+futes <- df$futes
+emelet <- df$emelet
+allapot <- df$ing_allapota
+df$regio <- fct_collapse(df$megye,
+                                                      Del_Alfold = c("Bács-Kiskun", "Békés", "Csongrád"),
+                                                      Del_Dunantul = c( "Baranya", "Somogy"),
+                                                      Eszak_Alfold = c("Hajdú-Bihar", "Jász-Budapestgykun-Szolnok", "Szabolcs-Szatmár-Bereg"),
+                                                      Eszak_Magyarorszag = c("Borsod-Abaúj-Zemplén", "Nógrád"),
+                                                      Kozep_Dunantul = c("Fejér", "Komárom-Esztergom","Veszprém"),
+                                                      Nyugat_Dunantul = c("Gyor-Moson-Sopron","Vas", "Zala"),
+                                                      Pest="Pest",
+                                                      Budapest="Budapest")
 
 ui <- fluidPage (
     
