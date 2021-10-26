@@ -47,15 +47,16 @@ server <- function (input, output) {
         allapot_0 <- ifelse(input$allapot == "jó állapotú", 496.0745, ifelse(input$allapot == "felújított",9773.5857 ,ifelse(input$allapot == "közepes állapotú",-2241.7676 , ifelse(input$allapot == "felújítandó",0 ,ifelse(input$allapot == "építés alatt",-588.7225 , ifelse(input$allapot == "újszerű", 9641.4908,9560.0950 ))))))
         allapot_1 <- ifelse(input$allapot == "jó állapotú", 3610.2951, ifelse(input$allapot == "felújított",13049.3115 ,ifelse(input$allapot == "közepes állapotú",1249.2184 , ifelse(input$allapot == "felújítandó",0 ,ifelse(input$allapot == "építés alatt",4123.3078 , ifelse(input$allapot == "újszerű", 12932.9538,12992.5462 ))))))
         futes_0 <- ifelse(input$futes == "tavfutes", -13775.3213,ifelse(input$futes == "kozponti", -11920.8465,ifelse(input$futes == "egyeb",0 , ifelse(input$futes == "gaz", -10133.0781,-13815.3794))))
-        futes_0 <- ifelse(input$futes == "tavfutes", -10312.0114,ifelse(input$futes == "kozponti", -9139.0789,ifelse(input$futes == "egyeb",0 , ifelse(input$futes == "gaz",-7297.4525,-9940.2162))))
-        epites <- ifelse(input$epites == "panel",-6918.0025 , ifelse(input$epites == "tégla",5396.5884 ,0))
-        epites <- ifelse(input$epites == "panel",-1901.2460 , ifelse(input$epites == "tégla",9982.0008 ,0))
+        futes_1 <- ifelse(input$futes == "tavfutes", -10312.0114,ifelse(input$futes == "kozponti", -9139.0789,ifelse(input$futes == "egyeb",0 , ifelse(input$futes == "gaz",-7297.4525,-9940.2162))))
+        epites_0 <- ifelse(input$epites == "panel",-6918.0025 , ifelse(input$epites == "tégla",5396.5884 ,0))
+        epites_1 <- ifelse(input$epites == "panel",-1901.2460 , ifelse(input$epites == "tégla",9982.0008 ,0))
         # emelet <- input$emelet
         terulet <- input$nm
         eszoba <- input$eszoba
         fszoba <- input$fszoba
-        y_0 <- -22352.0123 + terulet*518.9742
-        output$text <- renderText(paste("A megadott paraméterek szerint a kiválasztott ingatlan körülbelül:", regio_0))
+        y_0 <- round(max(0, -22352.0123 + terulet*518.9742 +eszoba*6127.9906+fszoba*1962.9226 + regio_0+allapot_0+futes_0+epites_0))
+        y_1 <- round(max(0,-15449.0374 + terulet*544.1307 +eszoba*7076.3211+fszoba*2966.9356 + regio_1+allapot_1+futes_1+epites_1))
+        output$text <- renderText(paste("A megadott paraméterek szerint a kiválasztott ingatlan körülbelül:", y_0 , "és", y_1, "ezer Ft között van."))
 
         
         
