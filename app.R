@@ -1,0 +1,68 @@
+library (shiny)
+library (leaflet)
+unique(df$regio)
+df <- read.csv("adatb_regio.csv", encoding = "UTF-8")
+betak <- read.csv("betak.csv")
+regiok <- df$regio
+epites <- df$epites_tipusa
+futes <- df$futes
+emelet <- df$emelet
+allapot <- df$ing_allapota
+
+ui <- fluidPage (
+    
+    titlePanel ("shiny shiny"),
+    
+    sidebarLayout (
+        
+        sidebarPanel (
+            selectizeInput("regiok", "Régió kiválasztása", regiok ),
+            selectizeInput("epites", "Építés típusa:", epites ),
+            selectizeInput("futes", "fűtés típusa:", futes ),
+            # sliderInput("emelet", "Emeleti elhelyezkedés:", value = 2, min=-1, max =15 ),
+            selectizeInput("allapot", "Ingatlan állapota:", allapot ),
+            numericInput("nm", "Hány négyzetméter?", value = 50, min = 0, max = 100),
+            sliderInput("eszoba", "Egész szobák száma:" , value = 2, min =0, max = 7),
+            sliderInput("fszoba", "félszobák száma:" , value = 2, min =0, max = 7),
+            textOutput("text"),
+            
+        ),
+        
+        mainPanel (
+            plotOutput ("valamiPlot"),
+           
+
+        ),
+
+    )
+)
+
+
+server <- function (input, output) {
+    
+    output$valamiPlot <- renderPlot ({
+        
+        regio_0 <- ifelse(input$regiok == "Budapest",22890.8954,ifelse(input$regiok == "Del_Dunantul",1742.4534, ifelse(input$regiok == "Del_Alfold",0,ifelse(input$regiok == "Eszak_Magyarorszag",-13941.2071,ifelse(input$regiok == "Eszak_Alfold" ,-2653.0765,ifelse(input$regiok =="Kozep_Dunantul",3651.7846, ifelse(input$regiok == "Pest",2626.0978, -7327.6158)))))))
+        regio_1 <- ifelse(input$regiok == "Budapest",26773.0578,ifelse(input$regiok == "Del_Dunantul",6822.1720, ifelse(input$regiok == "Del_Alfold",0,ifelse(input$regiok == "Eszak_Magyarorszag",-9052.4014,ifelse(input$regiok == "Eszak_Alfold" ,4022.5860,ifelse(input$regiok =="Kozep_Dunantul",8569.6903, ifelse(input$regiok == "Pest",7458.3560, -1876.7824)))))))
+        allapot_0 <- ifelse(input$allapot == "jó állapotú", 496.0745, ifelse(input$allapot == "felújított",9773.5857 ,ifelse(input$allapot == "közepes állapotú",-2241.7676 , ifelse(input$allapot == "felújítandó",0 ,ifelse(input$allapot == "építés alatt",-588.7225 , ifelse(input$allapot == "újszerű", 9641.4908,9560.0950 ))))))
+        allapot_1 <- ifelse(input$allapot == "jó állapotú", 3610.2951, ifelse(input$allapot == "felújított",13049.3115 ,ifelse(input$allapot == "közepes állapotú",1249.2184 , ifelse(input$allapot == "felújítandó",0 ,ifelse(input$allapot == "építés alatt",4123.3078 , ifelse(input$allapot == "újszerű", 12932.9538,12992.5462 ))))))
+        futes_0 <- ifelse(input$futes == "tavfutes", -13775.3213,ifelse(input$futes == "kozponti", -11920.8465,ifelse(input$futes == "egyeb",0 , ifelse(input$futes == "gaz", -10133.0781,-13815.3794))))
+        futes_0 <- ifelse(input$futes == "tavfutes", -10312.0114,ifelse(input$futes == "kozponti", -9139.0789,ifelse(input$futes == "egyeb",0 , ifelse(input$futes == "gaz",-7297.4525,-9940.2162))))
+        epites <- ifelse(input$epites == "panel",-6918.0025 , ifelse(input$epites == "tégla",5396.5884 ,0))
+        epites <- ifelse(input$epites == "panel",-1901.2460 , ifelse(input$epites == "tégla",9982.0008 ,0))
+        # emelet <- input$emelet
+        terulet <- input$nm
+        eszoba <- input$eszoba
+        fszoba <- input$fszoba
+        y_0 <- -22352.0123 + terulet*518.9742
+        output$text <- renderText(paste("A megadott paraméterek szerint a kiválasztott ingatlan körülbelül:", regio_0))
+
+        
+        
+    })
+    
+}
+
+shinyApp (ui = ui , server = server)
+
+
