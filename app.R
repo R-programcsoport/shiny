@@ -1,5 +1,6 @@
 library (shiny)
 library (leaflet)
+library(tidyverse)
 unique(df$regio)
 df <- read.csv("adatb_regio.csv", encoding = "UTF-8")
 betak <- read.csv("betak.csv")
@@ -11,13 +12,15 @@ allapot <- df$ing_allapota
 
 ui <- fluidPage (
     
-    titlePanel ("shiny shiny"),
+    theme = bslib::bs_theme (bootswatch = "darkly"),
+  
+    titlePanel ("Ingatlanpiac elemzése"),
     
     sidebarLayout (
         
         sidebarPanel (
-            selectizeInput("regiok", "Régió kiválasztása", regiok ),
-            selectizeInput("epites", "Építés típusa:", epites ),
+            selectizeInput("regiok", "Régió kiválasztása", regiok , selected="Budapest"),
+            selectizeInput("epites", "Építés típusa:", epites, selected=),
             selectizeInput("futes", "fűtés típusa:", futes ),
             # sliderInput("emelet", "Emeleti elhelyezkedés:", value = 2, min=-1, max =15 ),
             selectizeInput("allapot", "Ingatlan állapota:", allapot ),
@@ -29,10 +32,15 @@ ui <- fluidPage (
         ),
         
         mainPanel (
-            plotOutput ("valamiPlot"),
+          tabsetPanel(tabPanel("Árak", plotOutput("distPlot")),
+                      tabPanel ( "Lista" , dataTableOutput ("adatok")),
+                      tabPanel ( "Becslés" , plotOutput ("valamiPlot")),
+          plotOutput ("valamiPlot")
+            
+                        )
            
 
-        ),
+        )
 
     )
 )
@@ -57,9 +65,78 @@ server <- function (input, output) {
         y_0 <- round(max(0, -22352.0123 + terulet*518.9742 +eszoba*6127.9906+fszoba*1962.9226 + regio_0+allapot_0+futes_0+epites_0))
         y_1 <- round(max(0,-15449.0374 + terulet*544.1307 +eszoba*7076.3211+fszoba*2966.9356 + regio_1+allapot_1+futes_1+epites_1))
         output$text <- renderText(paste("A megadott paraméterek szerint a kiválasztott ingatlan körülbelül:", y_0 , "és", y_1, "ezer Ft között van."))
+    })
 
-        
-        
+    
+    
+    subdata <- reactive ({
+      
+      
+      regio_p <- switch(input$regiok,
+                        "Budapest"="Budapest",
+                        "Del_Dunantul"="Del_Dunantul",
+                        "Del_Alfold"="Del_Alfold",
+                        "Eszak_Magyarorszag"="Eszak_Magyarorszag",
+                        "Eszak_Alfold"="Eszak_Alfold",
+                        "Kozep_Dunantul"="Kozep_Dunantul",
+                        "Pest"="Pest")
+      
+      allapot_p <- switch (input$allapot ,
+                           "jó állapotú"="jó állapotú",
+                           "felújított"="felújított",
+                           "közepes állapotú"="közepes állapotú",
+                           "felújítandó"="felújítandó",
+                           "építés alatt"="építés alatt",
+                           "újszerű"="újszerű")
+      
+      epites_p <- switch (input$epites ,
+                          "panel"="panel",
+                          "tégla"="tégla")
+      
+      futes_p <- switch (input$futes ,
+                          "tavfutes"="tavfutes",
+                          "kozponti"="kozponti",
+                          "egyeb"="egyeb",
+                          "gaz"="gaz")
+      
+      terulet_p <- input$nm
+      
+      eszoba_p <- input$eszoba
+      
+      fszoba_p <- input$fszoba
+      
+      df %>% 
+        filter (regiok == regio_p & allapot==allapot_p & epites==epites_p & futes==futes_p & terulet_m_2>=terulet_p & egesz_szoba>=eszoba_p & felszobak_szama>=fszoba_p)
+      
+    })
+    
+    output$distPlot <- renderPlot ({
+      
+      ggplot (subdata ()) +
+        geom_histogram (aes (x = ar_e_ft), binwidth = 2000, fill=I("blue"), alpha=I(.2), color="darkblue")+
+        theme_classic()+
+        labs(title="Árak ", x="Lakás ára (ezer forint)", y="Lakások száma")
+      
+    })
+    
+    
+    
+    
+    
+    output$distPlot_2 <- renderPlot ({
+      
+      ggplot (df ()) +
+        geom_histogram (aes (x = ar_e_ft), binwidth = 2000, fill=I("blue"), alpha=I(.2), color="darkblue")+
+        theme_classic()+
+        labs(title="Árak ", x="Lakás ára (ezer forint)", y="Lakások száma")
+      
+    })
+    
+    
+    output$adatok <- renderDataTable ({
+      
+      subdata ()
+      
     })
     
 }
