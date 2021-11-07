@@ -153,7 +153,7 @@ waldtest(regr_0, regr_2)
 *Annak ellenőrzése, hogy modellünk jól specifikált a megfigyeléseken túli világban(RESET-teszt).*
 
 *Megnézzük, hogy jól specifikált-e a modell.*
-*Ezt technikailag a következő ötlettel fogjuk meg: Ha a jól specifikáltság H0-ja igaz, és nem hagytam ki nem-lineáris hatást, akkor, ha az eredeti regresszióm becsült eredményváltozó értékeinek (képletben az Y kalapoknak) négyzetét és köbét beveszem a regresszióba, mint extra két magyarázóváltozó, akkor e két változó együtthatója 0 lesz--> a lineáris becslésen végzett nem-lineáris transzformációk nem adnak extra magyarázóerőt a jól specifikált modellnek.*
+*Ezt technikailag a következő ötlettel fogjuk meg: Ha a jól specifikáltság H0-ja igaz, és nem hagytuk ki nem-lineáris hatást, akkor, ha az eredeti regressziónk becsült eredményváltozó értékeinek (képletben az Y kalapoknak) négyzetét és köbét bevesszük a regresszióba, mint extra két magyarázóváltozó, akkor e két változó együtthatója 0 lesz--> a lineáris becslésen végzett nem-lineáris transzformációk nem adnak extra magyarázóerőt a jól specifikált modellnek.*
 
 $$Y= \beta_0^{'}+\beta_1^{'}X_1+\beta_2^{'}X_2 + ... +\beta_k^{'}X_k +\gamma_1 \hat{Y}^2 +\gamma_2 \hat{Y}^3 $$
 $$H_0: γ_1 = γ_2 = 0 $$
