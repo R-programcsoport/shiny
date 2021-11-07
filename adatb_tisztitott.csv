@@ -1,4 +1,4 @@
-﻿Település;ár_EFt;terület (m^2);Szobák;Építés típusa;Futés;Emelet;Ing. állapota;Lift;Megye;egész szoba;félszobák száma
+﻿Település;ár_EFt;terulet;Szobák;Építéstípusa;Futés;Emelet;Ing. állapota;Lift;Megye;egészszoba;félszobákszáma
 Budapest III ker;31000;31;1;panel;távfűtés;NA;NA;nincs;Budapest;1;0
 Budapest IV ker;23900;38;1;panel;távfűtés;NA;jó állapotú;NA;Budapest;1;0
 Budapest V ker;24990;26;1;tégla;gáz (cirko);NA;NA;van;Budapest;1;0
@@ -5490,7 +5490,6 @@ Budapest VII ker;30500;53;1 + 1;tégla;gáz (cirko);NA;NA;van;Budapest;1;1
 Budapest XI ker;28200;40;1 + 1;tégla;gáz (konvektor);NA;jó állapotú;NA;Budapest;1;1
 Pécs;13999.9;39;1 + 1;panel;távfűtés;NA;NA;van;Baranya;1;1
 Budapest XVI ker;28900;45;1 + 1;tégla;gáz (konvektor);NA;felújítandó;NA;Budapest;1;1
-Kazincbarcika;85000;2 490;1 + 1;tégla;egyéb;NA;NA;nincs;Borsod-Abaúj-Zemplén;1;1
 Budapest VII ker;44900;50;1 + 1;tégla;gáz (cirko);NA;felújított;NA;Budapest;1;1
 Budapest V ker;52900;52;1 + 1;tégla;gáz (cirko);NA;felújított;NA;Budapest;1;1
 Vác;13700;34;1 + 1;vegyes;egyéb;NA;közepes állapotú;NA;Pest;1;1

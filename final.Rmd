@@ -1,0 +1,208 @@
+---
+title: "Beandado"
+output: html_document
+---
+*A scrapelés után megtisztítottuk az adatokat, hibás értékeket, hiányzó értékeket, hibás ékezeteket javítottuk, illetve a megyékből régiókat csináltunk, mert a 19 megye nem adott volna elég heterogén csoportokat véleményünk szerint.*
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE , 
+                      warning = F , 
+                      message = F)
+getwd()
+library(tidyverse)
+library(janitor)
+library(stats)
+library(car)
+library(GGally)
+library(corpcor)
+library(sandwich)
+library(lmtest)
+library(olsrr)
+library(corrplot)
+df <- read.csv("adatb_tisztitott.csv",sep=";", encoding = "UTF-8", stringsAsFactors=FALSE)
+getwd()
+names(df)[1]<- "Telepules"
+?clean
+df <- df %>% 
+  drop_na() %>% 
+  clean_names()
+  ?clean_names
+df<- filter(df, ing_allapota!="bontásra")
+df <- filter(df, telepules!= "Vir")
+df <- filter(df, telepules!= "Novalja")
+
+df$terulet_m_2 <- as.integer(df$terulet_m_2)
+df$ar_e_ft <- as.double(df$ar_e_ft)
+
+
+df <- filter(df, terulet_m_2<350)
+df <- filter(df, ar_e_ft <300000)
+
+df$lift<- ifelse(df$lift=="igen" | df$lift=="van", 1, 0)
+df$lift <- factor(df$lift, levels = c("1", "0"), labels = c("1", "0"))
+
+df$ing_allapota <- factor(df$ing_allapota, 
+                             levels = c("felújítandó", "építés alatt",
+  "közepes állapotú","felújított","jó állapotú", "újszerű", "új építésű")) 
+
+table(df$ing_allapota)
+
+df$epites_tipusa <- factor(df$epites_tipusa, levels=c("panel", "egyéb", "tégla"),
+                           labels = c("0", "1", "2"))
+
+df$terulet_m_2 <- as.integer(df$terulet_m_2)
+df$ar_e_ft <- as.double(df$ar_e_ft)
+
+df$futes <- fct_collapse (df$futes,
+  villany ="villany",
+  tavfutes = "távfűtés",
+  kozponti = "központi",
+  gaz = c("gáz", "gáz (cirko)", "gáz (konvektor)"),
+  egyeb = "egyéb")
+
+df$regio <- fct_collapse(df$megye,
+    Del_Alfold = c("Bács-Kiskun", "Békés", "Csongrád"),
+    Del_Dunantul = c( "Baranya", "Somogy"),
+    Eszak_Alfold = c("Hajdú-Bihar", "Jász-Budapestgykun-Szolnok", "Szabolcs-Szatmár-Bereg"),
+    Eszak_Magyarorszag = c("Borsod-Abaúj-Zemplén", "Nógrád"),
+    Kozep_Dunantul = c("Fejér", "Komárom-Esztergom","Veszprém"),
+    Nyugat_Dunantul = c("Gyor-Moson-Sopron","Vas", "Zala"),
+    Pest="Pest",
+    Budapest="Budapest")
+```
+
+## Regreszió) ##
+
+*Eredményváltozónk a lakások ára, ezer forintban.*
+
+  **Előfeltétel(ek):**
+
+**1.**    *Normális eloszlású változók*
+
+```{r}
+shapiro.test(df$ar_e_ft) 
+shapiro.test(df$terulet_m_2)
+
+hist(df$ar_e_ft)
+hist(df$terulet_m_2)
+```
+
+$$ H_0: a \space változó \space normális \space eloszlást \space követ.$$
+$$ H_1: a \space változó \space nem \space követ \space  normális \space eloszlást.$$
+p<0.01 ezért szignifikánsan eltér, az eloszlás nem tekinthető már normálisnak a az eredményváltozónál és minden magyarázóváltozónál. 
+Viszont  a nagy mintaelemszám miatt ( n>100 ) ettől eltekinthetünk CHT (CLT).
+
+
+
+  **Próba:**
+  
+
+
+$$H_0: β1 = β2 = . . . = βk = 0$$ 
+
+
+$$H_1: Van \space legalább \space 1 \space együttható, \space ami \space szignifikánsan \space eltér \space 0-tól. $$
+```{r}
+regr_0.0 <- aov(data = df, formula = ar_e_ft ~ terulet_m_2 + epites_tipusa +
+  futes + emelet + ing_allapota + lift + egesz_szoba + felszobak_szama + regio)
+regr_0 <- lm(data = df, formula = ar_e_ft ~ terulet_m_2 + epites_tipusa +
+  futes + emelet + ing_allapota + lift + egesz_szoba + felszobak_szama + regio)
+
+summary.lm(regr_0.0)
+summary(regr_0)
+```
+
+  **hatásméret**
+
+
+  $$R^2: 0.6885$$
+A magyarázóváltozók 68,85%-ban magyarázzák az ingatlanárak szóródását.
+
+  **Döntés és válasz:**
+ 
+H0 elvetésre kerül. Minden szokásos szignifikancia szint mellett a teljes modell szignifikánsnak mondható.
+
+## Modellszelekció ##
+
+*Feltételezésünk szerint a mintán kívüli világban a félszobák száma és az emelet változó bétája 0.*
+
+  **Próba:**
+
+
+$$H_0: \beta_{félszobak \space száma} = \beta_{emelet} = 0 $$
+$$H_1:  Legalább \space 1 \space együttható \space nem \space 0 .$$
+```{r}
+regr_2 <- lm (data = df, formula = ar_e_ft ~ terulet_m_2 + epites_tipusa +futes +  ing_allapota + lift  + regio + egesz_szoba)
+
+waldtest(regr_0, regr_2)
+
+```
+
+
+  **Döntés és válasz:**
+
+*H0 elfogadásra kerül. A vizsgáltváltozókat szelektáljuk modellünkből.*
+
+
+## Modellspecifikáció tesztelése ##
+
+
+  **Próba:**
+  
+*Annak ellenőrzése, hogy modellünk jól specifikált a megfigyeléseken túli világban(RESET-teszt).*
+
+*Megnézzük, hogy jól specifikált-e a modell.*
+*Ezt technikailag a következő ötlettel fogjuk meg: Ha a jól specifikáltság H0-ja igaz, és nem hagytuk ki nem-lineáris hatást, akkor, ha az eredeti regressziónk becsült eredményváltozó értékeinek (képletben az Y kalapoknak) négyzetét és köbét bevesszük a regresszióba, mint extra két magyarázóváltozó, akkor e két változó együtthatója 0 lesz--> a lineáris becslésen végzett nem-lineáris transzformációk nem adnak extra magyarázóerőt a jól specifikált modellnek.*
+
+$$Y= \beta_0^{'}+\beta_1^{'}X_1+\beta_2^{'}X_2 + ... +\beta_k^{'}X_k +\gamma_1 \hat{Y}^2 +\gamma_2 \hat{Y}^3 $$
+$$H_0: γ_1 = γ_2 = 0 $$
+$$H_1: A \space modell \space nem \space jól \space specifikált.$$
+
+```{r}
+
+resettest(regr_2, power = 2:3, type = "regressor", data = df)
+```
+
+  **Döntés és válasz:**
+
+H0 elutasításra kerül miden szoksásos szignifikancia szint mellett. Modellünk rosszul specifikált.
+
+## Standard modellfeltevések vizsgálata ##
+
+**Multikollnearitás vizsgálata Vif-mutatókkal.**
+
+```{r}
+vif(regr_2)
+  
+```
+
+**Döntés és válasz:**
+
+regr_2 modellünk Vif-mutatóinak elemzése során arra következtetünk, hogy modellünkben káros multikollinearitás nincs. Zavaró multikollinearitás fellép több változó esetében is, azonban a változók külön-külön való tartása érdekében nem foglalkozunk e problémával.
+
+**Heteroszkedaszticitás vizsgálata grafikusan és Breusch-Pagan próbával.**
+
+$$H_0: Nincs \space heteroszkedaszticitás = a\space reziduumok\space (ei-k)\space négyzeteit\space nem\space magyarázza\space jól\space $$ 
+$$ egyik\space eredeti\space magyarázóváltozónk \space sem. $$ 
+
+
+$$H_1: Van \space heteroszkedaszticitás $$ 
+
+```{r}
+par(mfrow=c(2,2))
+plot(regr_2)
+
+ncvTest(regr_2)
+ols_test_breusch_pagan(regr_2)
+```
+*H0-elvetésre kerül. Van heteroszkedaszticitás a modellünkben, azaz az elkövetett előrejelzési hibák, ei=(yi - becsült yi) reziduumok nem véletlenszerűek, hanem függnek attól, hogy milyen volt az eredményváltozó (Y) eredeti, valós értéke!*
+
+*Következmény(ek): tesztek és a paraméterekre adott konfidencia-intervallumokérvényüket vesztik, illetve a becsült standard hibák torzítottak és inkonzisztensek lesznek. *
+
+*Standard hibák korrigálása HCCME módszerrel*
+
+
+```{r}
+coeftest(regr_2, vcov. = vcovHC(regr_0, "HC1"))
+
+```
+
