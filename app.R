@@ -15,36 +15,72 @@ ui <- fluidPage (
     theme = bslib::bs_theme (bootswatch = "darkly"),
   
     titlePanel ("Ingatlanpiac elemzése"),
-    
-    sidebarLayout (
-        
-        sidebarPanel (
-            selectizeInput("regiok", "Régió kiválasztása", regiok , selected="Budapest"),
-            selectizeInput("epites", "Építés típusa:", epites, selected=),
-            selectizeInput("futes", "fűtés típusa:", futes ),
-            # sliderInput("emelet", "Emeleti elhelyezkedés:", value = 2, min=-1, max =15 ),
-            selectizeInput("allapot", "Ingatlan állapota:", allapot ),
-            numericInput("nm", "Hány négyzetméter?", value = 50, min = 0, max = 100),
-            sliderInput("eszoba", "Egész szobák száma:" , value = 2, min =0, max = 7),
-            sliderInput("fszoba", "félszobák száma:" , value = 2, min =0, max = 7),
-            textOutput("text"),
-            
-        ),
-        
-        mainPanel (
-          tabsetPanel(tabPanel("Árak", plotOutput("distPlot")),
-                      tabPanel ( "Lista" , dataTableOutput ("adatok")),
-                      tabPanel ( "Becslés" , plotOutput ("valamiPlot")),
-          plotOutput ("valamiPlot")
-            
-                        )
-           
+    #menü
+    navbarPage("Menü",
+               #1. tab - hisztogram
+               tabPanel("Lakásárak hisztogramja",
+                        sidebarLayout (
+                          sidebarPanel (selectInput("regiok", "Régió kiválasztása", regiok , selected="Budapest"),
+                                        selectInput("epites", "Építés típusa:", epites),
+                                        selectInput("futes", "fűtés típusa:", futes ),
+                                        # sliderInput("emelet", "Emeleti elhelyezkedés:", value = 2, min=-1, max =15 ),
+                                        selectInput("allapot", "Ingatlan állapota:", allapot ),
+                                        numericInput("nm", "Hány négyzetméter?", value = 50, min = 0, max = 100),
+                                        sliderInput("eszoba", "Egész szobák száma:" , value = 2, min =0, max = 7),
+                                        sliderInput("fszoba", "félszobák száma:" , value = 2, min =0, max = 7),
+                                        textOutput("text")),
+                          
+                          # ábra
+                          mainPanel (plotOutput("distPlot")))),
+               
+               #2. tab - lista
+               tabPanel("Lakások listája",
+                        sidebarLayout (
+                          sidebarPanel (selectizeInput("regiok", "Régió kiválasztása", regiok , selected="Budapest"),
+                                        selectizeInput("epites", "Építés típusa:", epites),
+                                        selectizeInput("futes", "fűtés típusa:", futes ),
+                                        # sliderInput("emelet", "Emeleti elhelyezkedés:", value = 2, min=-1, max =15 ),
+                                        selectizeInput("allapot", "Ingatlan állapota:", allapot ),
+                                        numericInput("nm", "Hány négyzetméter?", value = 50, min = 0, max = 100),
+                                        sliderInput("eszoba", "Egész szobák száma:" , value = 2, min =0, max = 7),
+                                        sliderInput("fszoba", "félszobák száma:" , value = 2, min =0, max = 7),
+                                        textOutput("text")),
+                          
+                          # lista
+                          mainPanel (dataTableOutput ("adatok")))),
+               
+               #3. tab - becslés
+               tabPanel("Becslés",
+                        sidebarLayout (
+                          sidebarPanel (selectizeInput("regiok", "Régió kiválasztása", regiok , selected="Budapest"),
+                                        selectizeInput("epites", "Építés típusa:", epites),
+                                        selectizeInput("futes", "fűtés típusa:", futes ),
+                                        # sliderInput("emelet", "Emeleti elhelyezkedés:", value = 2, min=-1, max =15 ),
+                                        selectizeInput("allapot", "Ingatlan állapota:", allapot ),
+                                        numericInput("nm", "Hány négyzetméter?", value = 50, min = 0, max = 100),
+                                        sliderInput("eszoba", "Egész szobák száma:" , value = 2, min =0, max = 7),
+                                        sliderInput("fszoba", "félszobák száma:" , value = 2, min =0, max = 7),
+                                        textOutput("text")),
+                          
+                          # becslés kiírítása
+                          mainPanel (verbatimTextOutput ("valamiPlot")))),
+               
+               #4. tab - régiónkénti statisztika
+               tabPanel("Árak leíró statisztikája régiónként",
+                        sidebarLayout(sidebarPanel (
+                          radioButtons (inputId = "gomb4",
+                                        label = "Változók" ,
+                                        choices = c ("Budapest",
+                                                     "Del_Dunantul",
+                                                     "Del_Alfold",
+                                                     "Eszak_Magyarorszag",
+                                                     "Eszak_Alfold",
+                                                     "Kozep_Dunantul",
+                                                     "Pest"))),
+                          mainPanel(verbatimTextOutput ("leiro")))),
 
-        )
-
-    )
-)
-
+               
+    ))
 
 server <- function (input, output) {
     
@@ -110,6 +146,26 @@ server <- function (input, output) {
       
     })
     
+    subdata2 <- reactive ({
+      
+      
+      regio_p <- switch(input$regiok,
+                        "Budapest"="Budapest",
+                        "Del_Dunantul"="Del_Dunantul",
+                        "Del_Alfold"="Del_Alfold",
+                        "Eszak_Magyarorszag"="Eszak_Magyarorszag",
+                        "Eszak_Alfold"="Eszak_Alfold",
+                        "Kozep_Dunantul"="Kozep_Dunantul",
+                        "Pest"="Pest")
+      
+      df %>% 
+        filter (regiok == regio_p)
+      
+    })
+    
+    
+    
+    
     output$distPlot <- renderPlot ({
       
       ggplot (subdata ()) +
@@ -137,6 +193,12 @@ server <- function (input, output) {
       
       subdata ()
       
+    })
+    
+    
+    output$leiro <- renderPrint ({
+      
+      psych::describe (subdata2())
     })
     
 }
