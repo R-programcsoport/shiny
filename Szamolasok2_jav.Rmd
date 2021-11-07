@@ -2,7 +2,7 @@
 title: "Beandado"
 output: html_document
 ---
-
+*A scrapelés után megtisztítottuk az adatokat, hibás értékeket, hiányzó értékeket, hibás ékezeteket javítottuk, illetve a megyékből régiókat csináltunk, mert a 19 megye nem adott volna elég heterogén csoportokat véleményünk szerint.*
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE , 
                       warning = F , 
@@ -146,11 +146,16 @@ waldtest(regr_0, regr_2)
 ## Modellspecifikáció tesztelése ##
 
 
+
+
   **Próba:**
   
 *Annak ellenőrzése, hogy modellünk jól specifikált a megfigyeléseken túli világban(RESET-teszt).*
 
+*Megnézzük, hogy jól specifikált-e a modell.*
+*Ezt technikailag a következő ötlettel fogjuk meg: Ha a jól specifikáltság H0-ja igaz, és nem hagytam ki nem-lineáris hatást, akkor, ha az eredeti regresszióm becsült eredményváltozó értékeinek (képletben az Y kalapoknak) négyzetét és köbét beveszem a regresszióba, mint extra két magyarázóváltozó, akkor e két változó együtthatója 0 lesz--> a lineáris becslésen végzett nem-lineáris transzformációk nem adnak extra magyarázóerőt a jól specifikált modellnek.*
 
+$$Y= \beta_0^{'}+\beta_1^{'}X_1+\beta_2^{'}X_2 + ... +\beta_k^{'}X_k +\gamma_1 \hat{Y}^2 +\gamma_2 \hat{Y}^3 $$
 $$H_0: γ_1 = γ_2 = 0 $$
 $$H_1: A \space modell \space nem \space jól \space specifikált.$$
 
